@@ -16,7 +16,8 @@ function StartGame() {
   const [computerHand, setComputerHand] = useState(null);
   const [finalRound, setFinalRound] = useState(false);
   const [ante, setAnte] = useState(0);
-  const [win, setWin] = useState(true);
+  const [isBestHandPlayer, setIsBestHandPlayer] = useState(null);
+  const [isBestHandComputer, setIsBestHandComputer] = useState(null);
 
   // PLAYER HAND POSSIBILITIES
   const [isStraight, setIsStraight] = useState(false);
@@ -38,8 +39,6 @@ function StartGame() {
   const [isTwoPairComputer, setIsTwoPairComputer] = useState(false);
   const [isStraightFlushComputer, setIsStraightFlushComputer] = useState(false);
   const [isHighCardComputer, setIsHighCardComputer] = useState(false);
-  let bestHandComputer = null;
-  let bestHandPlayer = null;
 
   // STRAIGHT CHECK
   const straightCheck = (batch) => {
@@ -159,31 +158,31 @@ function StartGame() {
 
     if (isStraight && isFlush) {
       console.log("STRONGEST HAND: Straight Flush");
-      bestHandPlayer = 9;
+      setIsBestHandPlayer(9);
     } else if (isFourKind) {
       console.log("STRONGEST HAND: Four of a Kind");
-      bestHandPlayer = 8;
+      setIsBestHandPlayer(8);
     } else if (isTwoPair && isThreeKind) {
       console.log("STRONGEST HAND: Full House");
-      bestHandPlayer = 7;
+      setIsBestHandPlayer(7);
     } else if (isFlush) {
       console.log("STRONGEST HAND: Flush");
-      bestHandPlayer = 6;
+      setIsBestHandPlayer(6);
     } else if (isStraight) {
       console.log("STRONGEST HAND: Straight");
-      bestHandPlayer = 5;
+      setIsBestHandPlayer(5);
     } else if (isThreeKind) {
       console.log("STRONGEST HAND: Three of a Kind");
-      bestHandPlayer = 4;
+      setIsBestHandPlayer(4);
     } else if (isTwoPair) {
       console.log("STRONGEST HAND: Two Pair");
-      bestHandPlayer = 3;
+      setIsBestHandPlayer(3);
     } else if (isTwoKind) {
       console.log("STRONGEST HAND: Pair");
-      bestHandPlayer = 2;
+      setIsBestHandPlayer(2);
     } else if (isHighCard) {
       console.log("STRONGEST HAND: High Card");
-      bestHandPlayer = 1;
+      setIsBestHandPlayer(1);
     }
   }, [
     isStraight,
@@ -208,31 +207,31 @@ function StartGame() {
 
     if (isStraightComputer && isFlushComputer) {
       console.log("STRONGEST HAND: Straight FlushComputer");
-      bestHandComputer = 9;
+      setIsBestHandComputer(9);
     } else if (isFourKindComputer) {
       console.log("STRONGEST HAND: Four of a KindComputer");
-      bestHandComputer = 8;
+      setIsBestHandComputer(8);
     } else if (isTwoPairComputer && isThreeKindComputer) {
       console.log("STRONGEST HAND: Full HouseComputer");
-      bestHandComputer = 7;
+      setIsBestHandComputer(7);
     } else if (isFlushComputer) {
       console.log("STRONGEST HAND: FlushComputer");
-      bestHandComputer = 6;
+      setIsBestHandComputer(6);
     } else if (isStraightComputer) {
       console.log("STRONGEST HAND: StraightComputer");
-      bestHandComputer = 5;
+      setIsBestHandComputer(5);
     } else if (isThreeKindComputer) {
       console.log("STRONGEST HAND: Three of a KindComputer");
-      bestHandComputer = 4;
+      setIsBestHandComputer(4);
     } else if (isTwoPairComputer) {
       console.log("STRONGEST HAND: Two PairComputer");
-      bestHandComputer = 3;
+      setIsBestHandComputer(3);
     } else if (isTwoKindComputer) {
       console.log("STRONGEST HAND: PairComputer");
-      bestHandComputer = 2;
+      setIsBestHandComputer(2);
     } else if (isHighCardComputer) {
       console.log("STRONGEST HAND: High CardComputer");
-      bestHandComputer = 1;
+      setIsBestHandComputer(1);
     }
   }, [
     isStraightComputer,
@@ -244,15 +243,71 @@ function StartGame() {
     isTwoPairComputer,
   ]);
 
+  const evaluatePairRank = (hand) => {
+    const faceToInteger = {
+      J: 11,
+      Q: 12,
+      K: 13,
+      A: 14,
+    };
+
+    const ranks = {};
+    hand.forEach((card) => {
+      const rank = card[0];
+      ranks[rank] = (ranks[rank] || 0) + 1;
+    });
+
+    let pairRank = 0;
+    for (const rank in ranks) {
+      if (
+        ranks[rank] === 2 &&
+        (faceToInteger[rank] || parseInt(rank)) > pairRank
+      ) {
+        pairRank = faceToInteger[rank] || parseInt(rank);
+      }
+    }
+    return pairRank;
+  };
+
   const compareHands = () => {
-    if (bestHandComputer > bestHandPlayer) {
+    console.log("BEST HAND COMPUTER", isBestHandComputer);
+    console.log("BEST HAND PLAYER", isBestHandPlayer);
+
+    if (isBestHandComputer > isBestHandPlayer) {
       console.log("COMPUTER WINS");
       setIsWinner("computer");
-    } else {
+    } else if (isBestHandPlayer > isBestHandComputer) {
+      setPlayerChips(playerChips + ante);
       console.log("PLAYER WINS");
       setIsWinner("player");
+    } else if (isBestHandComputer === 2 && isBestHandPlayer === 2) {
+      const playerBatch = [
+        ...myCards.map((card) => card.code),
+        ...flop.map((card) => card.code),
+        ...tableCards.map((card) => card.code),
+      ];
+      const computerBatch = [
+        ...computerHand.map((card) => card.code),
+        ...flop.map((card) => card.code),
+        ...tableCards.map((card) => card.code),
+      ];
+
+      const playerPairRank = evaluatePairRank(playerBatch);
+      const computerPairRank = evaluatePairRank(computerBatch);
+
+      if (playerPairRank > computerPairRank) {
+        console.log("PLAYER WINS");
+        setIsWinner("player");
+      } else if (computerPairRank > playerPairRank) {
+        console.log("COMPUTER WINS");
+        setIsWinner("computer");
+      } else {
+        console.log("TIE");
+        setIsWinner("TIE");
+      }
     }
   };
+
   // FLUSH CHECK
 
   const flushCheck = (batch) => {
@@ -479,6 +534,10 @@ function StartGame() {
     setIsFlushComputer(false);
     setIsStraightFlushComputer(false);
     setIsTwoPairComputer(false);
+    setIsBestHandComputer(null);
+    setIsBestHandPlayer(null);
+    setIsStraightComputer(false);
+    setIsStraight(false);
   };
 
   const resetStatesPlayer = () => {
@@ -497,13 +556,6 @@ function StartGame() {
     setIsFlushComputer(false);
     setIsStraightFlushComputer(false);
     setIsTwoPairComputer(false);
-  };
-
-  const newGame = () => {
-    if (win) {
-      setPlayerChips(playerChips + ante);
-    }
-    resetGame();
   };
 
   const retrieveDeck = async () => {
@@ -571,8 +623,13 @@ function StartGame() {
 
     evaluateComputerHand();
     evaluatePlayerHand();
-    compareHands();
   };
+
+  useEffect(() => {
+    if (isBestHandComputer !== null && isBestHandPlayer !== null) {
+      compareHands();
+    }
+  }, [isBestHandComputer, isBestHandPlayer]);
 
   const evaluatePlayerHand = () => {
     const allPlayerCards = [...myCards, ...flop, ...tableCards];
@@ -705,7 +762,7 @@ function StartGame() {
                 </Button>
               )}
               {finalRound && (
-                <Button onClick={newGame} colorScheme="cyan">
+                <Button onClick={resetGame} colorScheme="cyan">
                   NEW GAME
                 </Button>
               )}
