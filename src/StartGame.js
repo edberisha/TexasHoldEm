@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Button, Flex, Image, Text, VStack, Box } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  Image,
+  Text,
+  VStack,
+  Box,
+  HStack,
+} from "@chakra-ui/react";
 import backgroundImage from "./JEJ CASINO.png";
 
 function StartGame() {
@@ -145,6 +153,25 @@ function StartGame() {
     }
 
     return null;
+  };
+
+  const playerWinsChips = () => {
+    setPlayerChips(ante + playerChips);
+  };
+
+  useEffect(() => {
+    if (isWinner === "player") {
+      playerWinsChips();
+    }
+  }, [isWinner]);
+
+  const turnRaise = () => {
+    if (playerChips >= 10) {
+      setAnte(ante + 10);
+      setPlayerChips(playerChips - 10);
+    } else {
+      console.log("Not enough chips");
+    }
   };
 
   // PLAYER HAND USE EFFECT
@@ -549,6 +576,7 @@ function StartGame() {
     setIsThreeKind(false);
     setIsTwoKind(false);
     setIsFlush(false);
+    setIsStraight(false);
     setIsStraightFlush(false);
     setIsTwoPair(false);
     setIsFourKindComputer(false);
@@ -560,26 +588,7 @@ function StartGame() {
     setIsBestHandComputer(null);
     setIsBestHandPlayer(null);
     setIsStraightComputer(false);
-    setIsStraight(false);
     setIsWinner(null);
-  };
-
-  const resetStatesPlayer = () => {
-    setIsFourKind(false);
-    setIsThreeKind(false);
-    setIsTwoKind(false);
-    setIsFlush(false);
-    setIsStraightFlush(false);
-    setIsTwoPair(false);
-  };
-
-  const resetStatesComputer = () => {
-    setIsFourKindComputer(false);
-    setIsThreeKindComputer(false);
-    setIsTwoKindComputer(false);
-    setIsFlushComputer(false);
-    setIsStraightFlushComputer(false);
-    setIsTwoPairComputer(false);
   };
 
   const retrieveDeck = async () => {
@@ -812,6 +821,13 @@ function StartGame() {
                     >
                       CALL TURN
                     </Button>
+                    <Button
+                      marginLeft="20px"
+                      onClick={turnRaise}
+                      colorScheme="pink"
+                    >
+                      RAISE (+10)
+                    </Button>
                   </VStack>
                 )}
                 {flopped && tableCards.length === 1 && (
@@ -823,6 +839,13 @@ function StartGame() {
                       colorScheme="orange"
                     >
                       CALL RIVER
+                    </Button>
+                    <Button
+                      marginLeft="20px"
+                      onClick={turnRaise}
+                      colorScheme="pink"
+                    >
+                      RAISE (+10)
                     </Button>
                   </VStack>
                 )}
@@ -836,6 +859,13 @@ function StartGame() {
                       colorScheme="purple"
                     >
                       PLAY FINAL
+                    </Button>
+                    <Button
+                      marginLeft="20px"
+                      onClick={turnRaise}
+                      colorScheme="pink"
+                    >
+                      RAISE (+10)
                     </Button>
                   </VStack>
                 )}
@@ -874,7 +904,6 @@ function StartGame() {
                       WebkitTextFillColor: "red",
                     }}
                   >
-                    {" "}
                     {rankToHandConverter(isBestHandPlayer)}
                   </Text>
                 </Box>
@@ -904,6 +933,22 @@ function StartGame() {
                     }}
                   >
                     {rankToHandConverter(isBestHandComputer)}
+                  </Text>
+                </Box>
+              )}
+              {isWinner === "tie" && (
+                <Box>
+                  <Text
+                    color="red"
+                    fontWeight="bold"
+                    fontSize="40"
+                    textAlign="center"
+                    style={{
+                      WebkitTextStroke: "1px white",
+                      WebkitTextFillColor: "red",
+                    }}
+                  >
+                    TIE
                   </Text>
                 </Box>
               )}
