@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Flex, Image, Text, VStack, Box } from "@chakra-ui/react";
+import backgroundImage from "./JEJ CASINO.png";
 
 function StartGame() {
   // ALL INSTANCES OF STATE
@@ -269,6 +270,10 @@ function StartGame() {
     return pairRank;
   };
 
+  const resetChips = () => {
+    setPlayerChips(playerChips + 100);
+  };
+
   const compareHands = () => {
     console.log("BEST HAND COMPUTER", isBestHandComputer);
     console.log("BEST HAND PLAYER", isBestHandPlayer);
@@ -302,8 +307,26 @@ function StartGame() {
         console.log("COMPUTER WINS");
         setIsWinner("computer");
       } else {
-        console.log("TIE");
-        setIsWinner("TIE");
+        const playerNonPairCards = playerBatch.filter(
+          (card) => card !== playerPairRank
+        );
+        const computerNonPairCards = computerBatch.filter(
+          (card) => card !== computerPairRank
+        );
+
+        playerNonPairCards.sort((a, b) => b - a);
+        computerNonPairCards.sort((a, b) => b - a);
+
+        if (playerNonPairCards[0] > computerNonPairCards[0]) {
+          console.log("PLAYER WINS with higher non-pair card");
+          setIsWinner("player");
+        } else if (playerNonPairCards[0] < computerNonPairCards[0]) {
+          console.log("COMPUTER WINS with higher non-pair card");
+          setIsWinner("computer");
+        } else {
+          console.log("TIE");
+          setIsWinner("tie");
+        }
       }
     }
   };
@@ -538,6 +561,7 @@ function StartGame() {
     setIsBestHandPlayer(null);
     setIsStraightComputer(false);
     setIsStraight(false);
+    setIsWinner(null);
   };
 
   const resetStatesPlayer = () => {
@@ -577,8 +601,6 @@ function StartGame() {
 
     setMyCards(data.cards);
     setDrawn(true);
-    setAnte(ante + 20);
-    setPlayerChips(playerChips - 10);
 
     await drawComputerCards();
   };
@@ -671,6 +693,22 @@ function StartGame() {
     highCardCheckComputer(batch);
   };
 
+  const rankToHandConverter = (handType) => {
+    const handTypeMap = {
+      9: "Straight Flush",
+      8: "Four of a Kind",
+      7: "Full House",
+      6: "Flush",
+      5: "Straight",
+      4: "Three of a Kind",
+      3: "Two Pair",
+      2: "Pair",
+      1: "High Card",
+    };
+
+    return handTypeMap[handType];
+  };
+
   return (
     <Flex
       direction="column"
@@ -678,15 +716,23 @@ function StartGame() {
       justify="center"
       minH="100vh"
       w="100%"
+      background="darkgreen"
     >
       <Flex>
-        {!activeSession && (
+        <Image left="720px" src={backgroundImage} position="fixed" top="15" />
+      </Flex>
+      <Flex>
+        {playerChips <= 0 && !activeSession && (
+          <VStack>
+            <Text>NO MORE CHIPS</Text>
+            <Button onClick={resetChips} colorScheme="blue">
+              Buy Back: 100 Chips
+            </Button>
+          </VStack>
+        )}
+        {!activeSession && playerChips > 0 && (
           <VStack spacing="4" align="center">
-            <Button
-              onClick={retrieveDeck}
-              disabled={startGame}
-              colorScheme="blue"
-            >
+            <Button onClick={retrieveDeck} colorScheme="blue">
               START GAME
             </Button>
           </VStack>
@@ -698,23 +744,34 @@ function StartGame() {
             </Button>
           </VStack>
         )}
-        {finalRound && (
+        {activeSession && myCards && (
           <VStack>
             <Text fontSize="xl">COMPUTER'S CARDS:</Text>
             <Flex>
-              {computerHand.map((card, index) => (
-                <Image
-                  key={`${card.code}-${index}`}
-                  src={card.image}
-                  boxSize="100px"
-                />
-              ))}
+              {finalRound ? (
+                computerHand.map((card, index) => (
+                  <Image
+                    key={`${card.code}-${index}`}
+                    src={card.image}
+                    boxSize="100px"
+                  />
+                ))
+              ) : (
+                <>
+                  <Image
+                    src="https://www.deckofcardsapi.com/static/img/back.png"
+                    boxSize="100px"
+                  />
+                  <Image
+                    src="https://www.deckofcardsapi.com/static/img/back.png"
+                    boxSize="100px"
+                  />
+                </>
+              )}
             </Flex>
-          </VStack>
-        )}
-        {myCards && activeSession && (
-          <VStack>
-            <Text fontSize="xl">MY CARDS:</Text>
+            <Text marginTop="40px" fontSize="xl">
+              MY CARDS:
+            </Text>
             <Flex>
               {myCards.map((card) => (
                 <Image key={card.code} src={card.image} boxSize="100px" />
@@ -723,11 +780,16 @@ function StartGame() {
 
             <VStack>
               {!flop && (
-                <Button onClick={drawFlop} colorScheme="teal">
-                  DRAW FLOP
-                </Button>
+                <VStack>
+                  <Text>CALL: 10 Chips</Text>
+                  <Button onClick={drawFlop} colorScheme="teal">
+                    DRAW FLOP
+                  </Button>
+                </VStack>
               )}
-              <Text fontSize="xl">TABLE</Text>
+              <Text marginTop="40px" fontSize="xl">
+                TABLE
+              </Text>
               <Flex>
                 {flop &&
                   flop.map((card) => (
@@ -741,18 +803,38 @@ function StartGame() {
                   />
                 ))}
                 {flopped && tableCards.length === 0 && (
-                  <Button onClick={hitCard} colorScheme="yellow">
-                    CALL TURN
-                  </Button>
+                  <VStack>
+                    <Text>CALL: 10 Chips</Text>
+                    <Button
+                      marginLeft="20px"
+                      onClick={hitCard}
+                      colorScheme="yellow"
+                    >
+                      CALL TURN
+                    </Button>
+                  </VStack>
                 )}
                 {flopped && tableCards.length === 1 && (
-                  <Button onClick={hitCard} colorScheme="orange">
-                    CALL RIVER
-                  </Button>
+                  <VStack>
+                    <Text>CALL: 10 Chips</Text>
+                    <Button
+                      marginLeft="20px"
+                      onClick={hitCard}
+                      colorScheme="orange"
+                    >
+                      CALL RIVER
+                    </Button>
+                  </VStack>
                 )}
                 {tableCards.length === 2 && !finalRound && (
                   <VStack>
-                    <Button onClick={handleFinalRound} colorScheme="purple">
+                    <Text>CALL: 10 Chips</Text>
+
+                    <Button
+                      marginLeft="20px"
+                      onClick={handleFinalRound}
+                      colorScheme="purple"
+                    >
                       PLAY FINAL
                     </Button>
                   </VStack>
@@ -768,6 +850,63 @@ function StartGame() {
                   NEW GAME
                 </Button>
               )}
+              {isWinner === "player" && (
+                <Box>
+                  <Text
+                    color="red"
+                    fontWeight="bold"
+                    fontSize="40"
+                    textAlign="center"
+                    style={{
+                      WebkitTextStroke: "1px white",
+                      WebkitTextFillColor: "red",
+                    }}
+                  >
+                    PLAYER WINS!
+                  </Text>
+                  <Text
+                    color="red"
+                    fontWeight="bold"
+                    fontSize="40"
+                    textAlign="center"
+                    style={{
+                      WebkitTextStroke: "1px white",
+                      WebkitTextFillColor: "red",
+                    }}
+                  >
+                    {" "}
+                    {rankToHandConverter(isBestHandPlayer)}
+                  </Text>
+                </Box>
+              )}
+              {isWinner === "computer" && (
+                <Box>
+                  <Text
+                    color="red"
+                    fontWeight="bold"
+                    fontSize="40"
+                    textAlign="center"
+                    style={{
+                      WebkitTextStroke: "1px white",
+                      WebkitTextFillColor: "red",
+                    }}
+                  >
+                    COMPUTER WINS!
+                  </Text>
+                  <Text
+                    color="red"
+                    fontWeight="bold"
+                    fontSize="40"
+                    textAlign="center"
+                    style={{
+                      WebkitTextStroke: "1px white",
+                      WebkitTextFillColor: "red",
+                    }}
+                  >
+                    {rankToHandConverter(isBestHandComputer)}
+                  </Text>
+                </Box>
+              )}
             </VStack>
           </VStack>
         )}
@@ -780,11 +919,18 @@ function StartGame() {
           display="flex"
           justifyContent="center"
           alignItems="center"
-          marginLeft="100px"
+          position="fixed"
+          top="300px"
+          right="500px"
         >
           <VStack>
-            <Text fontSize="m">Ante: {ante}</Text>
-            <Text fontSize="m">My Chips: {playerChips}</Text>
+            <Text fontWeight="bold" fontSize="m">
+              My Chips: {playerChips}
+            </Text>
+
+            <Text color="darkred" fontWeight="bold" fontSize="m">
+              Ante: {ante}
+            </Text>
           </VStack>
         </Box>
       </Flex>
