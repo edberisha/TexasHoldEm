@@ -8,7 +8,7 @@ import {
   Box,
   HStack,
 } from "@chakra-ui/react";
-import backgroundImage from "./JEJ CASINO.png";
+import backgroundImage from "./LOGO.png";
 
 function StartGame() {
   // ALL INSTANCES OF STATE
