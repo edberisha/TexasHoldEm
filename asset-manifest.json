@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/TexasHoldEm/static/css/main.31d6cfe0.css",
+    "main.js": "/TexasHoldEm/static/js/main.d88eff61.js",
+    "static/media/LOGO.png": "/TexasHoldEm/static/media/LOGO.32bfbe6b7a40fec27f2e.png",
+    "index.html": "/TexasHoldEm/index.html",
+    "main.d88eff61.js.map": "/TexasHoldEm/static/js/main.d88eff61.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.31d6cfe0.css",
+    "static/js/main.d88eff61.js"
+  ]
+}
