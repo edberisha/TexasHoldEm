@@ -727,9 +727,30 @@ function StartGame() {
       w="100%"
       background="darkgreen"
     >
-      <Flex>
-        <Image left="720px" src={backgroundImage} position="fixed" top="15" />
+      <Flex mb="auto">
+        <Image width={["200px","300px","300px","500px","500px"]} src={backgroundImage}  />
       </Flex>
+      <Box
+          w="215px"
+          h="100px"
+          bg="gray.200"
+          borderRadius="md"
+          textAlign="center"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <VStack>
+            <Text fontWeight="bold" fontSize="m">
+              My Chips: {playerChips}
+            </Text>
+
+            <Text color="darkred" fontWeight="bold" fontSize="m">
+              Ante: {ante}
+            </Text>
+          </VStack>
+        </Box>
+
       <Flex>
         {playerChips <= 0 && !activeSession && (
           <VStack>
@@ -740,22 +761,22 @@ function StartGame() {
           </VStack>
         )}
         {!activeSession && playerChips > 0 && (
-          <VStack spacing="4" align="center">
-            <Button onClick={retrieveDeck} colorScheme="blue">
+          <VStack pt="10" spacing="4" align="center">
+            <Button  mb="50vh" onClick={retrieveDeck} colorScheme="blue">
               START GAME
             </Button>
           </VStack>
         )}
         {activeSession && !myCards && (
-          <VStack>
-            <Button onClick={drawCards} disabled={drawn} colorScheme="green">
+          <VStack pt="10">
+            <Button mb="40vh" onClick={drawCards} disabled={drawn} colorScheme="green">
               DRAW CARDS
             </Button>
           </VStack>
         )}
         {activeSession && myCards && (
           <VStack>
-            <Text fontSize="xl">COMPUTER'S CARDS:</Text>
+            <Text color="white" fontSize="xl">COMPUTER'S CARDS:</Text>
             <Flex>
               {finalRound ? (
                 computerHand.map((card, index) => (
@@ -778,7 +799,7 @@ function StartGame() {
                 </>
               )}
             </Flex>
-            <Text marginTop="40px" fontSize="xl">
+            <Text color="white" marginTop="40px" fontSize="xl">
               MY CARDS:
             </Text>
             <Flex>
@@ -871,7 +892,7 @@ function StartGame() {
                 )}
               </Flex>
               {!finalRound && (
-                <Button onClick={resetGame} colorScheme="red">
+                <Button mb="10vh" onClick={resetGame} colorScheme="red">
                   FOLD
                 </Button>
               )}
@@ -955,29 +976,7 @@ function StartGame() {
             </VStack>
           </VStack>
         )}
-        <Box
-          w="215px"
-          h="100px"
-          bg="gray.200"
-          borderRadius="md"
-          textAlign="center"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          position="fixed"
-          top="300px"
-          right="500px"
-        >
-          <VStack>
-            <Text fontWeight="bold" fontSize="m">
-              My Chips: {playerChips}
-            </Text>
 
-            <Text color="darkred" fontWeight="bold" fontSize="m">
-              Ante: {ante}
-            </Text>
-          </VStack>
-        </Box>
       </Flex>
     </Flex>
   );
